@@ -1,26 +1,92 @@
-from sly import Lexer
+from sly import Lexer, Parser
 
 class CalcLexer(Lexer):
     # Set of token names.   This is always required
-    tokens = { ID, NUMBER, PLUS, MINUS, TIMES, DIVIDE, ASSIGN, LPAREN, RPAREN }
+    tokens = {NUMBER, PLUS, MINUS, TIMES, COMMA, SEMICOLON, LBRACKET, RBRACKET, LPAREN, RPAREN, TRANSP}
 
     # String containing ignored characters between tokens
     ignore = ' \t'
 
     # Regular expression rules for tokens
-    ID      = r'[a-zA-Z_][a-zA-Z0-9_]*'
-    NUMBER  = r'\d+'
+    # NUMBER  = r'\d+'
     PLUS    = r'\+'
     MINUS   = r'-'
     TIMES   = r'\*'
-    DIVIDE  = r'/'
-    ASSIGN  = r'='
-    LPAREN  = r'\('
-    RPAREN  = r'\)'
+    COMMA = r','
+    SEMICOLON = r';'
+    LBRACKET = r'\['
+    RBRACKET = r'\]'
+    LPAREN = r'\('
+    RPAREN = r'\)'
+    TRANSP = r't'
+
+    # Ignored pattern
+    ignore_newline = r'\n+'     
+
+    # Extra \n for newlines
+    def ignore_newline(self, t):
+        self.lineno += t.value.count('\n')
+
+    def error(self, t):
+        print("Illegal character '%s'" % t.value[0])
+        self.index += 1
+
+    @_(r'\d+')
+    def NUMBER(self, t):
+        print(int(t.value))
+        t.value = int(t.value)
+        # return t
+
+class CalcParser(Parser):
+    # Get the token list from the lexer (required)
+    tokens = CalcLexer.tokens
+
+    precedence = (
+       ('left', PLUS, MINUS),
+       ('left', TIMES),
+       ('left', TRANSP),
+    )
+
+    # Grammar rules and actions
+    @_('S PLUS M')
+    def S(self, p):
+        return p.term + p.factor
+
+    @_('S MINUS M')
+    def S(self, p):
+        return p.term - p.factor
+
+    @_('M')
+    def S(self, p):
+        return p.term
+
+    @_('M TIMES matrix')
+    def M(self, p):
+        return p.factor * p.value
+
+    @_('matrix')
+    def M(self, p):
+        return p.value
+
+    @_('TRANSP matrix')
+    def matrix(self, p):
+        return p.value
+
+    @_('LPAREN S RPAREN')
+    def matrix(self, p):
+        return p.value
+
+    @_('LBRACKET NUMBER COMMA NUMBER SEMICOLON NUMBER COMMA NUMBER RBRACKET')
+    def matrix(self, p):
+        return p.value
 
 if __name__ == '__main__':
-    data = 'x = 3 + 42 * (s - t)'
+    data = input('Digite a sua expressão:')
     lexer = CalcLexer()
+    parser = CalcParser()
     for tok in lexer.tokenize(data):
         print('type=%r, value=%r' % (tok.type, tok.value))
+    
+    result = parser.parse(lexer.tokenize(data))
+    print(result)
 
