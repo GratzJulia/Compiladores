@@ -113,7 +113,6 @@ class CalcParser(Parser):
         # realiza a leitura de uma matriz. Respeita as regras de precedência!
         return p
 
-    # def 
 
 if __name__ == '__main__':
     data = input('Digite a sua expressão:')
