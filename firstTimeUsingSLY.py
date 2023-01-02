@@ -50,7 +50,7 @@ class CalcParser(Parser):
     # Grammar rules and actions
     @_('M')
     def S(self, p):
-        # print('--- S ---')
+        print('\n--- S ---')
         return p.M
 
     @_('S PLUS M')
@@ -79,7 +79,7 @@ class CalcParser(Parser):
   
     @_('matrix')
     def M(self, p):
-        # print('--- M ---')
+        print('\n--- M ---')
         return p.matrix
 
     @_('M TIMES matrix')
@@ -109,7 +109,7 @@ class CalcParser(Parser):
 
     @_('LBRACKET NUMBER COMMA NUMBER SEMICOLON NUMBER COMMA NUMBER RBRACKET')
     def matrix(self, p):
-        print('\n--- matrix ---')
+        print('\n--- leitura de uma matrix ---')
         # realiza a leitura de uma matriz. Respeita as regras de precedência!
         return p
 
