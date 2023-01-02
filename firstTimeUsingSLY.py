@@ -84,8 +84,15 @@ class CalcParser(Parser):
 
     @_('M TIMES matrix')
     def M(self, p):
-        # print('--- M vezes ---')
-        return p 
+        print('\n--- M vezes ---')
+        copyMatrix = list(p.matrix)
+
+        copyMatrix[2] = (p.M[2] * p.matrix[2]) + (p.M[4] * p.matrix[6])
+        copyMatrix[4] = (p.M[2] * p.matrix[4]) + (p.M[4] * p.matrix[8])
+        copyMatrix[6] = (p.M[6] * p.matrix[2]) + (p.M[8] * p.matrix[6])
+        copyMatrix[8] = (p.M[6] * p.matrix[4]) + (p.M[8] * p.matrix[8])
+        print(tuple(copyMatrix))
+        return tuple(copyMatrix)
 
     @_('TRANSP matrix')
     def matrix(self, p):
