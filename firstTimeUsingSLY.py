@@ -8,7 +8,6 @@ class CalcLexer(Lexer):
     ignore = ' \t'
 
     # Regular expression rules for tokens
-    # NUMBER  = r'\d+'
     PLUS    = r'\+'
     MINUS   = r'-'
     TIMES   = r'\*'
@@ -33,9 +32,9 @@ class CalcLexer(Lexer):
 
     @_(r'\d+')
     def NUMBER(self, t):
-        print(int(t.value))
+        # converte qualquer entrada numérica para valor inteiro
         t.value = int(t.value)
-        # return t
+        return t
 
 class CalcParser(Parser):
     # Get the token list from the lexer (required)
@@ -45,48 +44,85 @@ class CalcParser(Parser):
        ('left', PLUS, MINUS),
        ('left', TIMES),
        ('left', TRANSP),
+       ('left', LPAREN, RPAREN)
     )
 
     # Grammar rules and actions
+    @_('M')
+    def S(self, p):
+        # print('--- S ---')
+        return p.M
+
     @_('S PLUS M')
     def S(self, p):
-        return p.term + p.factor
+        print('\n--- S soma ---')        
+        copyS = list(p.S)
+        copyM = list (p.M)
+        copyM[2] = copyS[2] + copyM[2]
+        copyM[4] = copyS[4] + copyM[4]
+        copyM[6] = copyS[6] + copyM[6]
+        copyM[8] = copyS[8] + copyM[8]
+        print(tuple(copyM))
+        return tuple(copyM)
 
     @_('S MINUS M')
     def S(self, p):
-        return p.term - p.factor
-
-    @_('M')
-    def S(self, p):
-        return p.term
+        print('\n--- S subtração ---')
+        copyS = list(p.S)
+        copyM = list (p.M)
+        copyM[2] = copyS[2] - copyM[2]
+        copyM[4] = copyS[4] - copyM[4]
+        copyM[6] = copyS[6] - copyM[6]
+        copyM[8] = copyS[8] - copyM[8]
+        print(tuple(copyM))
+        return tuple(copyM)
+  
+    @_('matrix')
+    def M(self, p):
+        # print('--- M ---')
+        return p.matrix
 
     @_('M TIMES matrix')
     def M(self, p):
-        return p.factor * p.value
-
-    @_('matrix')
-    def M(self, p):
-        return p.value
+        # print('--- M vezes ---')
+        return p 
 
     @_('TRANSP matrix')
     def matrix(self, p):
-        return p.value
+        print('\n--- operação transposta ---')
+        # p.matrix é uma tupla!
+        print(p.matrix)
+        a01 = p.matrix[4]
+        a10 = p.matrix[6]
+        
+        copy = list(p.matrix)
+        copy[4] = a10
+        copy[6] = a01
+        print(tuple(copy))
+        return tuple(copy)
 
     @_('LPAREN S RPAREN')
     def matrix(self, p):
-        return p.value
+        print('\n--- () ---')
+        # apenas remove os parênteses!
+        return p.S
 
     @_('LBRACKET NUMBER COMMA NUMBER SEMICOLON NUMBER COMMA NUMBER RBRACKET')
     def matrix(self, p):
-        return p.value
+        print('\n--- matrix ---')
+        # realiza a leitura de uma matriz. Respeita as regras de precedência!
+        return p
+
+    # def 
 
 if __name__ == '__main__':
     data = input('Digite a sua expressão:')
     lexer = CalcLexer()
     parser = CalcParser()
-    for tok in lexer.tokenize(data):
-        print('type=%r, value=%r' % (tok.type, tok.value))
+    # for tok in lexer.tokenize(data):
+    #     print('type=%r, value=%r' % (tok.type, tok.value))
+   
     
     result = parser.parse(lexer.tokenize(data))
+    print('\n--- RESULTADO FINAL ---')
     print(result)
-
