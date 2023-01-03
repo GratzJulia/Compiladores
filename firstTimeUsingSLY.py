@@ -1,26 +1,15 @@
 from sly import Lexer, Parser
 
+
 class CalcLexer(Lexer):
     # Set of token names.   This is always required
-    tokens = {NUMBER, PLUS, MINUS, TIMES, COMMA, SEMICOLON, LBRACKET, RBRACKET, LPAREN, RPAREN, TRANSP}
-
-    # String containing ignored characters between tokens
-    ignore = ' \t'
-
-    # Regular expression rules for tokens
-    PLUS    = r'\+'
-    MINUS   = r'-'
-    TIMES   = r'\*'
-    COMMA = r','
-    SEMICOLON = r';'
-    LBRACKET = r'\['
-    RBRACKET = r'\]'
-    LPAREN = r'\('
-    RPAREN = r'\)'
-    TRANSP = r't'
+    tokens = {
+        NUMBER, PLUS, MINUS, TIMES, COMMA, SEMICOLON, LBRACKET, RBRACKET,
+        LPAREN, RPAREN, TRANSP
+    }
 
     # Ignored pattern
-    ignore_newline = r'\n+'     
+    ignore_newline = r'\n+'
 
     # Extra \n for newlines
     def ignore_newline(self, t):
@@ -30,21 +19,37 @@ class CalcLexer(Lexer):
         print("Illegal character '%s'" % t.value[0])
         self.index += 1
 
-    @_(r'\d+')
+    @_(r'-?\d+')
     def NUMBER(self, t):
         # converte qualquer entrada numérica para valor inteiro
         t.value = int(t.value)
         return t
+
+    # String containing ignored characters between tokens
+    ignore = ' \t'
+
+    # Regular expression rules for tokens
+    PLUS = r'\+'
+    MINUS = r'-'
+    TIMES = r'\*'
+    COMMA = r','
+    SEMICOLON = r';'
+    LBRACKET = r'\['
+    RBRACKET = r'\]'
+    LPAREN = r'\('
+    RPAREN = r'\)'
+    TRANSP = r't'
+
 
 class CalcParser(Parser):
     # Get the token list from the lexer (required)
     tokens = CalcLexer.tokens
 
     precedence = (
-       ('left', PLUS, MINUS),
-       ('left', TIMES),
-       ('left', TRANSP),
-       ('left', LPAREN, RPAREN)
+        ('left', PLUS, MINUS),
+        ('left', TIMES),
+        ('left', TRANSP),
+        ('left', LPAREN, RPAREN),
     )
 
     # Grammar rules and actions
@@ -55,9 +60,9 @@ class CalcParser(Parser):
 
     @_('S PLUS M')
     def S(self, p):
-        print('\n--- S soma ---')        
+        print('\n--- S soma ---')
         copyS = list(p.S)
-        copyM = list (p.M)
+        copyM = list(p.M)
         copyM[2] = copyS[2] + copyM[2]
         copyM[4] = copyS[4] + copyM[4]
         copyM[6] = copyS[6] + copyM[6]
@@ -69,14 +74,14 @@ class CalcParser(Parser):
     def S(self, p):
         print('\n--- S subtração ---')
         copyS = list(p.S)
-        copyM = list (p.M)
+        copyM = list(p.M)
         copyM[2] = copyS[2] - copyM[2]
         copyM[4] = copyS[4] - copyM[4]
         copyM[6] = copyS[6] - copyM[6]
         copyM[8] = copyS[8] - copyM[8]
         print(tuple(copyM))
         return tuple(copyM)
-  
+
     @_('matrix')
     def M(self, p):
         print('\n--- M ---')
@@ -101,7 +106,7 @@ class CalcParser(Parser):
         print(p.matrix)
         a01 = p.matrix[4]
         a10 = p.matrix[6]
-        
+
         copy = list(p.matrix)
         copy[4] = a10
         copy[6] = a01
@@ -127,8 +132,7 @@ if __name__ == '__main__':
     parser = CalcParser()
     # for tok in lexer.tokenize(data):
     #     print('type=%r, value=%r' % (tok.type, tok.value))
-   
-    
+
     result = parser.parse(lexer.tokenize(data))
     print('\n--- RESULTADO FINAL ---')
     print(result)
