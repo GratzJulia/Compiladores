@@ -1,4 +1,5 @@
 from sly import Lexer, Parser
+# Sly reference: https://sly.readthedocs.io/en/latest/
 
 
 class CalcLexer(Lexer):
